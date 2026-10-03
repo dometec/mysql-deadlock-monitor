@@ -1,17 +1,17 @@
 # mysql-deadlock-monitor
 
-Container Docker che monitora i deadlock di un database MySQL usando
+Docker container that monitors deadlocks on a MySQL database using
 [`pt-deadlock-logger`](https://docs.percona.com/percona-toolkit/pt-deadlock-logger.html)
-di Percona Toolkit. Ogni `MYSQL_INNODB_STATUS_INTERVAL` secondi interroga
-`SHOW ENGINE INNODB STATUS` e scrive i deadlock rilevati (formato tab-separated)
-sullo standard output e nel file `/usr/src/app/logs/deadlock-logger.log`.
+from Percona Toolkit. Every `MYSQL_INNODB_STATUS_INTERVAL` seconds it queries
+`SHOW ENGINE INNODB STATUS` and writes the detected deadlocks (tab-separated)
+to standard output and to `/usr/src/app/logs/deadlock-logger.log`.
 
-## Contenuto
+## Contents
 
-| File | Descrizione |
-|------|-------------|
-| `Dockerfile` | Immagine basata su `perl:stable-bookworm` con Percona Toolkit, client MySQL 8.4 LTS (repository Percona `pdps-84-lts`) ed `expect`. |
-| `command_exp_wrapper.sh` | Script di avvio: legge la configurazione dalle variabili d'ambiente e lancia `pt-deadlock-logger` tramite `expect`. |
+| File                     | Description                                                                                                                           |
+|--------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
+| `Dockerfile`             | Image based on `perl:stable-bookworm` with Percona Toolkit, the MySQL 8.4 LTS client (Percona `pdps-84-lts` repository) and `expect`. |
+| `command_exp_wrapper.sh` | Startup script: reads the configuration from environment variables and runs `pt-deadlock-logger` through `expect`.                    |
 
 ## Build
 
@@ -19,7 +19,7 @@ sullo standard output e nel file `/usr/src/app/logs/deadlock-logger.log`.
 docker build -t mysql-deadlock-monitor .
 ```
 
-## Utilizzo
+## Usage
 
 ```bash
 docker run -d --name deadlock-monitor \
@@ -31,26 +31,26 @@ docker run -d --name deadlock-monitor \
   mysql-deadlock-monitor
 ```
 
-Per leggere l'output: `docker logs -f deadlock-monitor`.
+To follow the output: `docker logs -f deadlock-monitor`.
 
-## Configurazione
+## Configuration
 
-Tutte le variabili sono opzionali e hanno un valore di default.
+All variables are optional and have a default value.
 
-| Variabile | Default | Descrizione |
-|-----------|---------|-------------|
-| `MYSQL_HOST` | `127.0.0.1` | Host del server MySQL. |
-| `MYSQL_USER` | `quarkus` | Utente MySQL. |
-| `MYSQL_PASSWORD` | `quarkus` | Password dell'utente. |
-| `MYSQL_DB` | `mysql` | Database a cui connettersi. |
-| `MYSQL_INNODB_STATUS_INTERVAL` | `1` | Intervallo (secondi) tra due letture di `SHOW ENGINE INNODB STATUS`. |
-| `START_WAIT` | `1` | Attesa (secondi) prima di avviare il comando, utile ad esempio per attendere l'avvio del database. |
+| Variable                       | Default     | Description                                                                            |
+|--------------------------------|-------------|----------------------------------------------------------------------------------------|
+| `MYSQL_HOST`                   | `127.0.0.1` | MySQL server host.                                                                     |
+| `MYSQL_USER`                   | `quarkus`   | MySQL user.                                                                            |
+| `MYSQL_PASSWORD`               | `quarkus`   | User password.                                                                         |
+| `MYSQL_DB`                     | `mysql`     | Database to connect to.                                                                |
+| `MYSQL_INNODB_STATUS_INTERVAL` | `1`         | Interval (seconds) between two `SHOW ENGINE INNODB STATUS` reads.                      |
+| `START_WAIT`                   | `1`         | Delay (seconds) before starting the command, e.g. to wait for the database to come up. |
 
-L'utente MySQL deve avere il privilegio `PROCESS`, necessario per eseguire
+The MySQL user needs the `PROCESS` privilege, required to run
 `SHOW ENGINE INNODB STATUS`.
 
-## Note
+## Notes
 
-- Se si vuole conservare il log, montare un volume su `/usr/src/app/logs`.
-- Le credenziali di default sono pensate solo per sviluppo: in produzione
-  usare un utente dedicato con i soli privilegi necessari.
+- To keep the log, mount a volume on `/usr/src/app/logs`.
+- The default credentials are meant for development only: in production use a
+  dedicated user with the minimum required privileges.
